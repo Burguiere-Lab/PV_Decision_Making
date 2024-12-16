@@ -74,7 +74,7 @@ Typical install time:  20 min.
 
 ## 3 Description of Code's Functionality
 
-<br> &rarr;  Please refer to the <b> flowcharts diagrams </b>  [folder](https://github.com/Burguiere-Lab/PV_Decision_Making/Flowcharts) as it provides a detailed schematic description of the code's workflow. The complete description can be found in the Methods section.
+<br> &rarr;  Please refer to the <b> flowcharts diagrams </b>  [folder](https://github.com/Burguiere-Lab/PV_Decision_Making/tree/main/Flowcharts) as it provides a detailed schematic description of the code's workflow. The complete description can be found in the Methods section.
 <br> &diams; For more detailed information, users can refer to the in-code comments within the script and its functions.
 The core functionality of the main script:
 ### INPUT 
