@@ -23,7 +23,7 @@
 ## 1 System Requirements
 * <b> MATLAB version: </b> The code was developped using Matlab R2017b.
 * <b> Operating System: </b> The code was developped and tested under Windows 10.
-* <b> MATLAB Toolboxes: </b>
+* <b> MATLAB Toolboxes: </b> None
 * <b> Arduino IDE version 1.8.8 </b>
 * <b> Arduino IDE libraries: </b>
   Bridge (1.7.0), Esplora (1.0.4), Ethernet (2.0.0), Firmata (2.5.8), GSM (1.0.6), Keyboard (1.0.2), LiquidCrystal (1.0.7), Mouse (1.0.1)
@@ -74,25 +74,49 @@ Typical install time:  20 min.
 
 ## 3 Description of Code's Functionality
 
+![Dependency Chart](/Flowcharts/DependencyChart.png)
+
 <br> &rarr;  Please refer to the <b> flowcharts diagrams </b>  [folder](https://github.com/Burguiere-Lab/PV_Decision_Making/tree/main/Flowcharts) as it provides a detailed schematic description of the code's workflow. The complete description can be found in the Methods section.
 <br> &diams; For more detailed information, users can refer to the in-code comments within the script and its functions.
 The core functionality of the main script:
 ### INPUT 
-### EXCEL Configuration and initialization files
-*  `config_ordi_4.xlsx    `  Configuration file of the experiment:  
+#### EXCEL Configuration and initialization files
+*  `config_ordi_4.xlsx ` - Configuration file of the experiment:  Defines the COMs establishing the USB connection between the computer and the Arduino Mega micro controller. Defines the pins on the Arduino Mega board associated with each variable.  
 Defines the COMs establishing the USB connection between the computer and the Arduino Mega micro controller 
 Defines the pins on the Arduino Mega board associated with each variable  
-### Graohical User Interface
-* `launcher.m`  First function that is called when ‘run’ is run, generates the launching window of the GUI
-* `WiringConfig.m` - converts and loads the information from the onfig_ordi_4.xlsx sheet into Matlab 
+### Graphical User Interface
+* `launcher.m` - First function that is called when ‘run’ is run, generates the launching window of the GUI
+* `WiringConfig.m` - Converts and loads the information from the onfig_ordi_4.xlsx sheet into Matlab 
 * `TaskParameters.m` - Defines the details to choose from in the Task Parameters tab in the launcher window 
 * `MonitoringWindowGeneration.m` - Generates the monitoring window that allows real time tracking of the animals in the BEATbox 
 * `MonitoringWindowRefreshDecisionPV.m` - Allows to update the Monitoring window in the Decision PV task to display the last actions in the task  
 * `DialogInterface.m`- Generates the Dialog Interface that allows to see the animal information and control the task remotely 
 * `DialogInterfaceSave.m` - Allows to save the changes made in the Dialog Interface  
+### Main Files
+* `luminance.m` - Main script for the box management. It first declares all the needed variables and initiates the dialog with the Arduinos Megas. It sequentially reads inputs from the BEATbox (getState.m), and manages outputs to the boxes accordingly (outputmanagement.m).  
+* `getState.m` - This function gathers the state of each BEATbox to know which input hardware is on or off and thus know what the mouse is currently doing.
+* `outputmanagement.m` - Manages the outputs in the  BEATboxes according to their states.
+### Task: Decision PV
+* `DecisionPVTask.m` - Function called in luminance. Depending on the value of box.Stage, this function redirects the task towards the appropriate stage of the task. 
+* `DecisionPVStage1.m` - Training Stage 1: During this stage, the mouse learns that it can get pellets at the food dispenser. For that, pellets are automatically distributed every 60 seconds after the mouse nose-pokes (except for the 1st one). 
+* `DecisionPVStage2.m` - Training Stage 2: During this stage, the mouse associates nose-poking in the food dispenser with food delivery. For each nose-poke in the food-well, a pellet is distributed.
+![Stage1-2](/Flowcharts/1.png)
+* `DecisionPVStage3.m` - Training Stage 3: During this stage, the mouse learns to associate the side nose-pokes next to the screen with food delivery. Each time the mouse breaks the IR beams in one of the side nose-pokes, the screens start blinking and a pellet is delivered in the food-well. The mouse has 15 seconds to retrieve the pellet and to validate the trial. Otherwise, the trial countdown is reset.
+![Stage3](/Flowcharts/2.png)
+* `DecisionPVStage5.m` - Stage 5: The task in which the animal makes bilateral choices based on a pair of visual stimuli that are presented during the cross of the tunnel in the BEATbox.
+![Stage5](/Flowcharts/3.png)
+* `DecisionPVStage4.m` - Stage 4: During this stage the animal receives bilateral optogenetic stimulation in stimulation trials
+![Stage4](/Flowcharts/4.png)
+* `tracesequence.m` - Psydo-randomized sequence of the stimuli presented to the animal, generated from Markov Chain - approximate algorithm.
+### ARDUINO
+* `Serial_Communication_Arduino_Mega` – Script for the Arduino mega board managing the input and output of the Arduino Unos in the BEATbox, and communicating wth Matlab.  
+* `code_mangeoire_interruption` – Script for the Arduino Uno board managing the input and output in the food dispenser.  
+* `Stimuli_Tasks_Arduino_Uno` - Script for the Arduino Uno board managing the input and output in the screen displaying the visual stimulus to the animal. 
+
+Note: The Arduino scripts need to be manually uploaded to the Arduino boards via USB connection before the task can be run.  
 
 ### OUTPUT
-* `TODO` todo
+A Monitoring Window and a Dialog interface will appear. The Monitoring Window provides real time tracking information about each mouse. The time spent in the task, the number of food rewards collected both in the last 24h and in total, the last action in the BEATbox and the according timestamp, and the Log of the animal’s behaviour in the task. The Dialog Interface allows to see the animal information, to reset the screen in the task as well as stop the task for one animal. All the data will be stored in the structure box in a .m file containing information about the animal identity, the task configuration, as well as information about each individual trial for each animal in the structure box.Data (stage, trial number, difficulty level, timestamps and names of all actions by the mouse, type of trial, decision-making duration, response time). 
 
 <div align="right">[ <a href="#readme-top">↑ Back to top ↑</a> ]</div>
 
@@ -106,7 +130,7 @@ The graphical user interface (GUI) will open from the script ‘launcher’
 
 Select which BEATboxes you would like to run by ticking the boxes in the GUI 
 
-Select the path in which you would like to store your data (for instance \\iss\nerb\nerb-md\pv\DecisionPV\Behaviour and Fiber photometry Oriana Lavielle\Clean_BEATbox_Code to use_fiber\Data output)  
+Select the path in which you would like to store your data
 
 In the tab ‘Wiring configuration’ you can load the excel configuration file config_ordi_4.xlsx     
 
@@ -114,7 +138,6 @@ In the tab ‘Task parameters’ enter the animal information and select the tas
 
 Click Run in the GUI to initialize the communication between the Arduino Mega micro controller and Matlab and to start the task 
 
-A Monitoring Window and a Dialog interface will appear. The Monitoring Window provides real time tracking information about each mouse. The time spent in the task, the number of food rewards collected both in the last 24h and in total, the last action in the BEATbox and the according timestamp, and the Log of the animal’s behaviour in the task. The Dialog Interface allows to see the animal information, to reset the screen in the task as well as stop the task for one animal.  
 
 <div align="right">[ <a href="#readme-top">↑ Back to top ↑</a> ]</div>
 
@@ -137,3 +160,6 @@ If you use this code or data we kindly ask you to cite our work.
 
 ## 6 License
 todo
+## 7 Credits
+This code is inspired in the work done by Marine Euvrad and Guillaume Penderia (add citation)
+Contributors: Oriana Lavielle and Anne Lorenz
